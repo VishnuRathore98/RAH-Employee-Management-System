@@ -29,7 +29,7 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-export default function DashboardLayout({ children }: DashboardLayoutProps) {
+export default function Admin({ children }: DashboardLayoutProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const router = useRouter();
 
@@ -39,7 +39,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const drawer = (
     <List>
-      <ListItemButton onClick={() => router.push("/employees")}>
+      <ListItemButton selected={true} onClick={() => router.push("/employees")}>
         <ListItemIcon>
           <HomeIcon />
         </ListItemIcon>
