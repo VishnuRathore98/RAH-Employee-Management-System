@@ -1,141 +1,190 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   Typography,
   Button,
+  Box,
   Stack,
   Paper,
-  TextField,
+  Divider,
   List,
   ListItem,
   ListItemText,
-  Snackbar,
-  Divider,
+  Container,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from "@mui/material";
-import dayjs from "dayjs";
-import DashboardLayout from "@/app/components/DashboardLayout";
-import EmployeeLayout from "@/app/components/EmployeeLayout";
-
-type AttendanceEntry = {
-  date: string;
-  checkIn?: string;
-  checkOut?: string;
-  tasks: string[];
-};
+import TaskAltIcon from "@mui/icons-material/TaskAlt";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import PlaylistAddIcon from "@mui/icons-material/PlaylistAdd";
 
 export default function AttendancePage() {
-  const today = dayjs().format("YYYY-MM-DD");
-  const [history, setHistory] = useState<AttendanceEntry[]>([]);
-  const [snackbar, setSnackbar] = useState({ open: false, message: "" });
-  const [newTask, setNewTask] = useState("");
+  const [tasks, setTasks] = useState<{ name: string; timeSpent: number }[]>([]);
+  const [checkInTime, setCheckInTime] = useState<string | null>(null);
+  const [checkOutTime, setCheckOutTime] = useState<string | null>(null);
+  const [submittedEntry, setSubmittedEntry] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [taskName, setTaskName] = useState("");
+  const [timeSpent, setTimeSpent] = useState("");
 
-  const showMessage = (msg: string) => {
-    setSnackbar({ open: true, message: msg });
-  };
+  const today = new Date().toISOString().split("T")[0];
 
-  const todayEntry = history.find((h) => h.date === today);
-
-  const handleCheckIn = () => {
-    if (todayEntry?.checkIn) {
-      return showMessage("Already checked in today");
-    }
-
-    const now = dayjs().format("HH:mm:ss");
-    if (todayEntry) {
-      todayEntry.checkIn = now;
-      setHistory([...history]);
-    } else {
-      setHistory([{ date: today, checkIn: now, tasks: [] }, ...history]);
-    }
-
-    showMessage("Checked in at " + now);
-  };
-
-  const handleCheckOut = () => {
-    if (!todayEntry?.checkIn) return showMessage("Please check in first");
-    if (todayEntry.checkOut) return showMessage("Already checked out");
-    if (!todayEntry.tasks || todayEntry.tasks.length === 0)
-      return showMessage("Add at least one task before checking out");
-
-    const now = dayjs().format("HH:mm:ss");
-    todayEntry.checkOut = now;
-    setHistory([...history]);
-    showMessage("Checked out at " + now);
+  const openTaskDialog = () => {
+    setTaskName("");
+    setTimeSpent("");
+    setDialogOpen(true);
   };
 
   const handleAddTask = () => {
-    if (!newTask.trim()) return;
-    if (!todayEntry) {
-      // Create entry if doesn't exist
-      setHistory([{ date: today, tasks: [newTask], checkIn: undefined }, ...history]);
-    } else {
-      todayEntry.tasks.push(newTask.trim());
-      setHistory([...history]);
+    const time = parseInt(timeSpent, 10);
+    if (taskName && !isNaN(time) && time > 0) {
+      setTasks((prev) => [...prev, { name: taskName, timeSpent: time }]);
+      setDialogOpen(false);
     }
-    setNewTask("");
+  };
+
+  const handleCheckIn = () => {
+    const time = new Date().toLocaleTimeString();
+    setCheckInTime(time);
+  };
+
+  const handleCheckout = () => {
+    if (tasks.length === 0) {
+      // Prompt to add a task first
+      openTaskDialog();
+      return;
+    }
+
+    const now = new Date().toLocaleTimeString();
+
+    const attendanceEntry = {
+      employeeId: "E001",
+      name: "Alice Johnson",
+      date: today,
+      checkIn: checkInTime,
+      checkOut: now,
+      tasks,
+    };
+
+    setCheckOutTime(now);
+    setSubmittedEntry(attendanceEntry);
   };
 
   return (
-    <EmployeeLayout>
-      <Paper sx={{ p: 4, maxWidth: 700, mx: "auto" }}>
-        <Stack spacing={3}>
-          <Typography variant="h5" textAlign="center">Attendance</Typography>
+    <Container maxWidth="md" sx={{ mt: 4 }}>
+      <Typography variant="h4" gutterBottom>
+        Employee Attendance
+      </Typography>
 
-          <Stack direction="row" spacing={2} justifyContent="center">
-            <Button variant="contained" onClick={handleCheckIn}>Check In</Button>
-            <Button variant="outlined" onClick={handleCheckOut}>Check Out</Button>
-          </Stack>
+      <Paper elevation={3} sx={{ p: 3, mb: 3 }}>
+        <Stack spacing={2} direction="row" flexWrap="wrap" gap={2}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleCheckIn}
+            disabled={!!checkInTime}
+            startIcon={<AccessTimeIcon />}
+          >
+            {checkInTime ? `Checked in at ${checkInTime}` : "Check In"}
+          </Button>
 
-          <Divider />
+          <Button
+            variant="outlined"
+            onClick={openTaskDialog}
+            disabled={!!checkOutTime}
+            startIcon={<PlaylistAddIcon />}
+          >
+            Add Task
+          </Button>
 
-          <Typography variant="h6">Today's Tasks</Typography>
-          <Stack direction="row" spacing={2}>
-            <TextField
-              label="New Task"
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-              fullWidth
-            />
-            <Button variant="contained" onClick={handleAddTask}>Add</Button>
-          </Stack>
+          <Button
+            variant="contained"
+            color="success"
+            onClick={handleCheckout}
+            disabled={!!checkOutTime}
+            startIcon={<CheckCircleOutlineIcon />}
+          >
+            {checkOutTime ? `Checked out at ${checkOutTime}` : "Check Out"}
+          </Button>
+        </Stack>
 
-          {todayEntry?.tasks?.length ? (
+        {tasks.length > 0 && (
+          <Paper sx={{ mt: 3, p: 2, backgroundColor: "#f9f9f9" }}>
+            <Typography variant="h6" gutterBottom>
+              Tasks Added:
+            </Typography>
             <List dense>
-              {todayEntry.tasks.map((task, i) => (
-                <ListItem key={i}>
-                  <ListItemText primary={task} />
+              {tasks.map((task, idx) => (
+                <ListItem key={idx}>
+                  <ListItemText
+                    primary={`${task.name} — ${task.timeSpent} min`}
+                  />
                 </ListItem>
               ))}
             </List>
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              No tasks added yet.
-            </Typography>
-          )}
+          </Paper>
+        )}
+      </Paper>
 
-          <Divider />
+      {submittedEntry && (
+        <Paper elevation={4} sx={{ p: 3, backgroundColor: "#e3f2fd" }}>
+          <Typography variant="h6" gutterBottom>
+            ✅ Summary of Day's Work
+          </Typography>
+          <Divider sx={{ my: 2 }} />
+          <Typography>Date: {submittedEntry.date}</Typography>
+          <Typography>Employee: {submittedEntry.name} (ID: {submittedEntry.employeeId})</Typography>
+          <Typography>Check-In: {submittedEntry.checkIn}</Typography>
+          <Typography>Check-Out: {submittedEntry.checkOut}</Typography>
 
-          <Typography variant="h6">History</Typography>
+          <Typography sx={{ mt: 2 }} variant="subtitle1">
+            Task Summary:
+          </Typography>
           <List dense>
-            {history.map((entry) => (
-              <ListItem key={entry.date} divider>
+            {submittedEntry.tasks.map((task: any, i: number) => (
+              <ListItem key={i}>
+                <TaskAltIcon sx={{ mr: 1 }} />
                 <ListItemText
-                  primary={`${entry.date} — In: ${entry.checkIn || "—"} | Out: ${entry.checkOut || "—"}`}
-                  secondary={`Tasks: ${entry.tasks.length}`}
+                  primary={`${task.name} — ${task.timeSpent} min`}
                 />
               </ListItem>
             ))}
           </List>
-        </Stack>
-      </Paper>
+        </Paper>
+      )}
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        message={snackbar.message}
-      />
-    </EmployeeLayout>
+      {/* Task Dialog */}
+      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Add Task</DialogTitle>
+        <DialogContent sx={{ mt: 1 }}>
+          <TextField
+            label="Task Name"
+            fullWidth
+            value={taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+            margin="dense"
+          />
+          <TextField
+            label="Time Spent (minutes)"
+            type="number"
+            fullWidth
+            value={timeSpent}
+            onChange={(e) => setTimeSpent(e.target.value)}
+            margin="dense"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+          <Button variant="contained" onClick={handleAddTask} disabled={!taskName || !timeSpent}>
+            Add
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 }
