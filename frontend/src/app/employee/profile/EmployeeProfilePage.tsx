@@ -10,7 +10,9 @@ import {
   List,
   ListItem,
   ListItemText,
+  Button,
 } from "@mui/material";
+import { useRef, useState } from "react";
 
 const mockEmployee = {
   name: "Alice Johnson",
@@ -19,7 +21,6 @@ const mockEmployee = {
   department: "Development",
   role: "Frontend Developer",
   joinDate: "2022-03-01",
-  avatarUrl: "", // optional
   attendanceSummary: {
     totalDaysPresent: 18,
     lastCheckIn: "9:15 AM",
@@ -32,16 +33,47 @@ const mockEmployee = {
 };
 
 export default function EmployeeProfilePage() {
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setAvatarUrl(imageUrl);
+    }
+  };
+
   return (
     <Paper sx={{ p: 4, maxWidth: 800, mx: "auto", mt: 5 }}>
       <Stack direction="row" spacing={3} alignItems="center">
-        <Avatar sx={{ width: 80, height: 80 }}>
-          {mockEmployee.name.charAt(0)}
+        <Avatar
+          src={avatarUrl ?? ""}
+          sx={{ width: 80, height: 80 }}
+        >
+          {!avatarUrl && mockEmployee.name.charAt(0)}
         </Avatar>
+
         <div>
           <Typography variant="h5">{mockEmployee.name}</Typography>
           <Typography>{mockEmployee.role}</Typography>
           <Typography>{mockEmployee.email}</Typography>
+        </div>
+
+        <div>
+          <Button
+            variant="outlined"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Upload Photo
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            onChange={handleUpload}
+            style={{ display: "none" }}
+          />
         </div>
       </Stack>
 
