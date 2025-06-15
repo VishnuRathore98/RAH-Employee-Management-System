@@ -20,6 +20,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useRouter } from "next/navigation";
 // import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
+import CampaignIcon from "@mui/icons-material/Campaign";
 
 const drawerWidth = 240;
 
@@ -61,6 +62,11 @@ export default function Admin({ children }: DashboardLayoutProps) {
         </ListItemIcon>
         <ListItemText primary='Edit Employee' />
       </ListItemButton> */}
+      <ListItemButton onClick={() => router.push("/admin/notices")}>
+  <ListItemIcon><CampaignIcon /></ListItemIcon> {/* import from @mui/icons-material */}
+  <ListItemText primary="Notices" />
+</ListItemButton>
+
 
       <ListItemButton component='a' href='/'>
         <ListItemIcon>
