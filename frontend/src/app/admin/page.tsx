@@ -21,6 +21,7 @@ import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useRouter } from "next/navigation";
 // import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import CampaignIcon from "@mui/icons-material/Campaign";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 
 const drawerWidth = 240;
 
@@ -67,6 +68,12 @@ export default function Admin({ children }: DashboardLayoutProps) {
   <ListItemText primary="Notices" />
 </ListItemButton>
 
+<ListItemButton onClick={() => router.push("/admin/leave-management")}>
+  <ListItemIcon>
+    <EventNoteIcon /> {/* You may need to import this */}
+  </ListItemIcon>
+  <ListItemText primary="Leave Requests" />
+</ListItemButton>
 
       <ListItemButton component='a' href='/'>
         <ListItemIcon>

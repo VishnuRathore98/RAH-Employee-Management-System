@@ -32,6 +32,7 @@ export default function EmployeeLayout({ children }: PropsWithChildren) {
     // { text: "Attendance", icon: <TimeIcon />, path: "/employee/attendance" },
     { text: "Tasks", icon: <TaskIcon />, path: "/employee/tasks" },
     {text: "Notices", icon:<CampaignIcon/>, path:"/employee/notices"},
+    {text: "Leaves", icon:<CampaignIcon/>, path:"/employee/leave"},
     { text: "Logout", icon: <LogoutIcon />, path: "/" },
   ];
 
