@@ -21,6 +21,7 @@ import {
 import { useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
 import CampaignIcon from "@mui/icons-material/Campaign";
+import InventoryIcon from "@mui/icons-material/Inventory";
 
 const drawerWidth = 220;
 
@@ -33,6 +34,8 @@ export default function EmployeeLayout({ children }: PropsWithChildren) {
     { text: "Tasks", icon: <TaskIcon />, path: "/employee/tasks" },
     {text: "Notices", icon:<CampaignIcon/>, path:"/employee/notices"},
     {text: "Leaves", icon:<CampaignIcon/>, path:"/employee/leave"},
+    { label: "My Assets", path: "/employee/assets", icon: <InventoryIcon /> },
+
     { text: "Logout", icon: <LogoutIcon />, path: "/" },
   ];
 
