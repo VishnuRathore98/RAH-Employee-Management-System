@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 // import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import EventNoteIcon from "@mui/icons-material/EventNote";
+import HistoryIcon from "@mui/icons-material/History";
 
 const drawerWidth = 240;
 
@@ -74,6 +75,14 @@ export default function Admin({ children }: DashboardLayoutProps) {
   </ListItemIcon>
   <ListItemText primary="Leave Requests" />
 </ListItemButton>
+
+      <ListItemButton selected={true} onClick={() => router.push("/admin/asset-history")}>
+        <ListItemIcon>
+          <HistoryIcon />
+        </ListItemIcon>
+        <ListItemText primary='Asset History' />
+      </ListItemButton>
+
 
       <ListItemButton component='a' href='/'>
         <ListItemIcon>
