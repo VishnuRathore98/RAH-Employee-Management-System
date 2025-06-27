@@ -11,10 +11,12 @@ import {
   ListItem,
   ListItemText,
   Paper,
+  TextField,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useState } from "react";
 
-// Mock data — would come from backend eventually
+// Mock data
 const mockAssetHistories = [
   {
     employeeName: "Alice Johnson",
@@ -47,13 +49,28 @@ const mockAssetHistories = [
 ];
 
 export default function AdminAssetHistory() {
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const filteredEmployees = mockAssetHistories.filter((emp) =>
+    emp.employeeName.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <Box p={4}>
       <Typography variant="h4" gutterBottom>
         Employee Asset History
       </Typography>
 
-      {mockAssetHistories.map((employee) => (
+      <TextField
+        label="Search Employee"
+        variant="outlined"
+        fullWidth
+        sx={{ mb: 3 }}
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+
+      {filteredEmployees.map((employee) => (
         <Accordion key={employee.employeeId} sx={{ mb: 2 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography fontWeight={600}>{employee.employeeName}</Typography>
@@ -81,6 +98,12 @@ export default function AdminAssetHistory() {
           </AccordionDetails>
         </Accordion>
       ))}
+
+      {filteredEmployees.length === 0 && (
+        <Typography variant="body1" color="text.secondary">
+          No employees found.
+        </Typography>
+      )}
     </Box>
   );
 }
