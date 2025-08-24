@@ -1,6 +1,5 @@
 from typing import Optional, List
 from uuid import UUID, uuid4
-from click import Option
 from pydantic import BaseModel, Field
 from enum import Enum
 
@@ -26,7 +25,7 @@ class User(BaseModel):
 
 
 class UserUpdateRequest(BaseModel):
-    first_name: Optional[str]
-    middle_name: Optional[str]
-    last_name: Optional[str]
-    roles: Optional[List[Role]]
+    first_name: Optional[str] = None
+    middle_name: Optional[str] = None
+    last_name: Optional[str] = None
+    roles: Optional[List[Role]] = []
