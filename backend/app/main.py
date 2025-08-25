@@ -1,11 +1,43 @@
+import sys
+import time
 from typing import List
 from uuid import UUID, uuid4
 from fastapi import FastAPI, HTTPException, status
-from h11 import Response
+import psycopg
+import psycopg.rows
+
+
+# from psycopg.extras import RealDictCursor
 
 from .models.models import Gender, Role, User, UserUpdateRequest
 
 app = FastAPI()
+
+while True:
+    try:
+        connection = psycopg.connect(
+            dbname="mydb",
+            user="vpsr",
+            password="12345678",
+            host="localhost",
+            port=5432,
+        )
+        cursor = connection.cursor(row_factory=psycopg.rows.dict_row)
+        print("Database connected successfully!")
+        break
+    except KeyboardInterrupt:
+        print("Interrupted by user, exiting...")
+        sys.exit(0)
+    except psycopg.OperationalError as error:
+        print("Error connecting database: ", error)
+        time.sleep(5)
+
+# For debugging
+# cursor.execute("SELECT * FROM users;")
+# # print(col.name for col in cursor.description)
+# colnames = [col.name for col in cursor.description]
+# print(colnames)
+# print(cursor.fetchall())
 
 db: List[User] = [
     User(
@@ -30,39 +62,79 @@ def read_root():
     return {"message": "Welcome to the RAH-EMS"}
 
 
+# Get user info from database
 @app.get("/api/v1/users")
 async def fetch_users():
-    return db
+    cursor.execute(""" SELECT * FROM users; """)
+    users = cursor.fetchall()
+    return users
 
 
+# Get single user info from database
+@app.get("/api/v1/users/{user_id}")
+async def fetch_users(user_id: UUID):
+    print(user_id)
+    cursor.execute(""" SELECT * FROM users WHERE user_id = (%s); """, (user_id,))
+    user = cursor.fetchone()
+    return user
+
+
+# Add a new user
 @app.post("/api/v1/users", status_code=status.HTTP_201_CREATED)
 async def create_user(user: User):
     db.append(user)
-    return {"id": user.id}
+    cursor.execute(
+        """INSERT INTO users (user_id, first_name, middle_name, last_name, gender, roles) 
+            VALUES (%s, %s, %s, %s, %s, %s) RETURNING *;""",
+        (
+            user.id,
+            user.first_name,
+            user.middle_name,
+            user.last_name,
+            user.gender,
+            user.roles,
+        ),
+    )
+    new_user = cursor.fetchone()
+    connection.commit()
+    return {"id": new_user["user_id"]}
 
 
+# Update user data with user_id
 @app.put("/api/v1/users/{user_id}", status_code=status.HTTP_202_ACCEPTED)
 async def update_user(user_update: UserUpdateRequest, user_id: UUID):
-    for user in db:
-        if user_id == user.id:
-            if user_update.first_name is not None:
-                user.first_name = user_update.first_name
-            if user_update.middle_name is not None:
-                user.middle_name = user_update.middle_name
-            if user_update.last_name is not None:
-                user.last_name = user_update.last_name
-            if user_update.roles is not None:
-                user.roles = user_update.roles
-            return user
-    raise HTTPException(status_code=404, detail="User not found!")
 
-
-@app.delete("/api/v1/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(user_id: UUID):
-    for user in db:
-        if user.id == user_id:
-            db.remove(user)
-            return
-    raise HTTPException(
-        status_code=404, detail=f"User with id: {user_id} does not exists."
+    cursor.execute(
+        """UPDATE users SET first_name=(%s), middle_name=(%s), last_name=(%s), roles=(%s) 
+                   WHERE user_id = (%s) RETURNING *;""",
+        (
+            user_update.first_name,
+            user_update.middle_name,
+            user_update.last_name,
+            user_update.roles,
+            user_id,
+        ),
     )
+    updated_user = cursor.fetchone()
+    connection.commit()
+
+    if updated_user == None:
+        raise HTTPException(status_code=404, detail="User not found!")
+
+    return updated_user
+
+
+# Delete user with user_id
+@app.delete("/api/v1/users/{user_id}", status_code=status.HTTP_200_OK)
+async def delete_user(user_id: UUID):
+
+    cursor.execute(
+        """ DELETE FROM users WHERE user_id=(%s) RETURNING *; """, (user_id,)
+    )
+    deleted_user = cursor.fetchone()
+    connection.commit()
+
+    if deleted_user == None:
+        raise HTTPException(status_code=404, detail="User does not exists.")
+
+    return {"message": f"User with id:{deleted_user["user_id"]} deleted successfully"}
