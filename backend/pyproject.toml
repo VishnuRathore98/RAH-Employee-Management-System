@@ -10,6 +10,8 @@ python = "^3.12"
 fastapi = "^0.115.12"
 uvicorn = {extras = ["standard"], version = "^0.35.0"}
 psycopg = {extras = ["binary", "pool"], version = "^3.2.9"}
+sqlmodel = "^0.0.24"
+psycopg2 = "^2.9.10"
 
 
 [build-system]
