@@ -8,18 +8,18 @@ from app.models import models
 from app.crud import database
 
 
-router = APIRouter()
+router = APIRouter(prefix="/api/v1/employee")
 
 
 # Get user info from database
-@router.get("/api/v1/users", response_model=List[schemas.Users])
+@router.get("/", response_model=List[schemas.Users])
 async def fetch_employees(db: Session = Depends(database.get_db)):
     employees = db.query(models.Employee).all()
     return employees
 
 
 # Get single user info from database
-@router.get("/api/v1/users/{user_id}", response_model=schemas.Users)
+@router.get("/{user_id}", response_model=schemas.Users)
 async def fetch_employee(user_id: UUID, db: Session = Depends(database.get_db)):
 
     employee = (
@@ -35,9 +35,7 @@ async def fetch_employee(user_id: UUID, db: Session = Depends(database.get_db)):
 
 
 # Add a new user
-@router.post(
-    "/api/v1/users", status_code=status.HTTP_201_CREATED, response_model=schemas.Users
-)
+@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Users)
 async def add_employee(user: models.User, db: Session = Depends(database.get_db)):
     employee = models.Employee(**user.model_dump())
     db.add(employee)
@@ -49,7 +47,7 @@ async def add_employee(user: models.User, db: Session = Depends(database.get_db)
 
 # Update user data with user_id
 @router.put(
-    "/api/v1/users/{user_id}",
+    "/{user_id}",
     status_code=status.HTTP_202_ACCEPTED,
     response_model=schemas.Users,
 )
@@ -71,7 +69,7 @@ async def update_employee(
 
 # Delete user with user_id
 @router.delete(
-    "/api/v1/users/{user_id}",
+    "/{user_id}",
     status_code=status.HTTP_200_OK,
 )
 async def delete_employee(user_id: UUID, db: Session = Depends(database.get_db)):

@@ -5,12 +5,12 @@ from app.schemas import schemas
 from app.models import models
 
 
-router = APIRouter()
+router = APIRouter(prefix="/api/v1/user")
 
 
 # Register new user
 @router.post(
-    "/api/v1/register",
+    "/",
     status_code=status.HTTP_201_CREATED,
     response_model=schemas.UserRegisterResponse,
 )
