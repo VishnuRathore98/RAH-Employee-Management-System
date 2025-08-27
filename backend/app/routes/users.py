@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from app.crud.database import get_db
 from app.schemas import schemas
 from app.models import models
+from app.utils import utils
 
 
 router = APIRouter(prefix="/api/v1/user", tags=["Users"])
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/api/v1/user", tags=["Users"])
 async def register_new_user(
     user: schemas.UserRegisterRequest, db: Session = Depends(get_db)
 ):
-    user.password = hash(user.password)
+    user.password = utils.hash(user.password)
     user_data = models.UserRegistration(**user.model_dump())
     db.add(user_data)
     db.commit()
