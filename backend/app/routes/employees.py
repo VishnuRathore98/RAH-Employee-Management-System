@@ -8,7 +8,7 @@ from app.models import models
 from app.crud import database
 
 
-router = APIRouter(prefix="/api/v1/employee")
+router = APIRouter(prefix="/api/v1/employee", tags=["Employees"])
 
 
 # Get user info from database

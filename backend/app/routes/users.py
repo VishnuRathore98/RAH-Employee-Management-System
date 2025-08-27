@@ -5,7 +5,7 @@ from app.schemas import schemas
 from app.models import models
 
 
-router = APIRouter(prefix="/api/v1/user")
+router = APIRouter(prefix="/api/v1/user", tags=["Users"])
 
 
 # Register new user
