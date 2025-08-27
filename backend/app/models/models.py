@@ -2,7 +2,7 @@ from typing import Optional, List
 from uuid import UUID, uuid4
 from pydantic import BaseModel, Field
 from enum import Enum
-from ..database import Base
+from app.crud.database import Base
 from sqlalchemy import ARRAY, TIMESTAMP, Column, String, Uuid, text
 
 
@@ -49,3 +49,18 @@ class UserUpdateRequest(BaseModel):
     middle_name: Optional[str] = None
     last_name: Optional[str] = None
     roles: Optional[List[Role]] = []
+
+
+class UserRegistration(Base):
+    __tablename__ = "user_register"
+    user_id = Column(
+        Uuid,
+        primary_key=True,
+        nullable=False,
+        server_default=text("uuid_generate_v4()"),
+    )
+    email = Column(String, nullable=False, unique=True)
+    password = Column(String, nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
+    )

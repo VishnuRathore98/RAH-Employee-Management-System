@@ -1,100 +1,25 @@
-import sys
-import time
-from typing import List
-from uuid import UUID, uuid4
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI
 import psycopg
 import psycopg.rows
-from sqlalchemy.orm import Session
-from app.models.models import Gender, Role, User, UserUpdateRequest, Base, Employee
-from app.database import engine, get_db
-from app.schemas import schemas
+from app.models.models import Base
+from app.crud.database import engine
+from app.routes import employees, users
 
 # Required FastAPI setup
 
 app = FastAPI()
 
 
-@app.get("/")
-def read_root():
-    return {"message": "Welcome to the RAH-EMS"}
-
-
-# Code using ORM(Object Relational Model) sqlalchemy
-
 # Base from models
 Base.metadata.create_all(bind=engine)
 
-
-# # Get user info from database
-@app.get("/api/v1/users", response_model=List[schemas.Users])
-async def fetch_users(db: Session = Depends(get_db)):
-    employees = db.query(Employee).all()
-    return employees
+app.include_router(employees.router)
+app.include_router(users.router)
 
 
-# Get single user info from database
-@app.get("/api/v1/users/{user_id}", response_model=schemas.Users)
-async def fetch_users(user_id: UUID, db: Session = Depends(get_db)):
-
-    employee = db.query(Employee).filter(Employee.user_id == user_id).first()
-
-    if employee == None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found!"
-        )
-
-    return employee
-
-
-# Add a new user
-@app.post(
-    "/api/v1/users", status_code=status.HTTP_201_CREATED, response_model=schemas.Users
-)
-async def create_user(user: User, db: Session = Depends(get_db)):
-    employee = Employee(**user.model_dump())
-    db.add(employee)
-    db.commit()
-    db.refresh(employee)
-
-    return employee
-
-
-# Update user data with user_id
-@app.put(
-    "/api/v1/users/{user_id}",
-    status_code=status.HTTP_202_ACCEPTED,
-    response_model=schemas.Users,
-)
-async def update_user(
-    user_update: UserUpdateRequest, user_id: UUID, db: Session = Depends(get_db)
-):
-    employee = db.query(Employee).filter(Employee.user_id == user_id)
-
-    if employee.first() == None:
-        raise HTTPException(status_code=404, detail="User not found!")
-
-    employee.update(user_update.model_dump())
-    db.commit()
-
-    return employee.first()
-
-
-# Delete user with user_id
-@app.delete(
-    "/api/v1/users/{user_id}",
-    status_code=status.HTTP_200_OK,
-)
-async def delete_user(user_id: UUID, db: Session = Depends(get_db)):
-
-    employee = db.query(Employee).filter(Employee.user_id == user_id)
-
-    if employee.first() == None:
-        raise HTTPException(status_code=404, detail="User does not exists.")
-    employee.delete(synchronize_session=False)
-    db.commit()
-
-    return {"message": f"User with id:{user_id} deleted successfully"}
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the RAH-EMS"}
 
 
 # ------------------ Code using psycopg ---------------------------
