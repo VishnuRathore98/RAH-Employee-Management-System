@@ -1,4 +1,5 @@
 from datetime import datetime
+from turtle import st
 from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr
@@ -38,3 +39,15 @@ class UserRegisterResponse(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+    class Config:
+        orm_mode = True
+
+
+class TokenData(BaseModel):
+    id: str

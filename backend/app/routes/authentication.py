@@ -9,7 +9,7 @@ from app.utils import oauth
 router = APIRouter(prefix="/api/v1", tags=["Authentication"])
 
 
-@router.post("/login")
+@router.post("/login", response_model=schemas.Token)
 async def userLogin(
     user_credentials: schemas.UserRegisterRequest,
     db: Session = Depends(database.get_db),
@@ -22,14 +22,14 @@ async def userLogin(
 
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Invalid user credentials!"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid user credentials!"
         )
 
     if not utils.verify(user_credentials.password, user.password):
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Invalid user credentials!"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Invalid user credentials!"
         )
 
     access_token = oauth.create_access_token(data={"user_id": str(user.user_id)})
     # Create and return JWT token
-    return {"access_token": "Bearer " + access_token}
+    return {"access_token": access_token, "token_type": "Bearer"}
