@@ -16,7 +16,8 @@ router = APIRouter(prefix="/api/v1/user", tags=["Users"])
     response_model=schemas.UserRegisterResponse,
 )
 async def register_new_user(
-    user: schemas.UserRegisterRequest, db: Session = Depends(get_db)
+    user: schemas.UserRegisterRequest,
+    db: Session = Depends(get_db),
 ):
     user.password = utils.hash(user.password)
     user_data = models.UserRegistration(**user.model_dump())

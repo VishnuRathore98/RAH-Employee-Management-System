@@ -1,34 +1,12 @@
-from typing import Optional, List
-from uuid import UUID, uuid4
-from pydantic import BaseModel, Field
-from enum import Enum
 from app.crud.database import Base
-from sqlalchemy import ARRAY, TIMESTAMP, Column, String, Uuid, text
+from sqlalchemy import ARRAY, TIMESTAMP, Column, ForeignKey, String, Uuid, text
 
-
-class Role(str, Enum):
-    admin = "admin"
-    manager = "manager"
-    employee = "employee"
-
-
-class Gender(str, Enum):
-    male = "male"
-    female = "female"
-
-
-class User(BaseModel):
-    # user_id: Optional[UUID] = Field(default_factory=uuid4)
-    first_name: str
-    middle_name: Optional[str] = None
-    last_name: str
-    gender: Gender
-    roles: List[Role]
+from app.routes import employees
 
 
 class Employee(Base):
-    __tablename__ = "employee"
-    user_id = Column(
+    __tablename__ = "employee_detail"
+    id = Column(
         Uuid,
         primary_key=True,
         nullable=False,
@@ -44,16 +22,9 @@ class Employee(Base):
     )
 
 
-class UserUpdateRequest(BaseModel):
-    first_name: Optional[str] = None
-    middle_name: Optional[str] = None
-    last_name: Optional[str] = None
-    roles: Optional[List[Role]] = []
-
-
 class UserRegistration(Base):
-    __tablename__ = "user_register"
-    user_id = Column(
+    __tablename__ = "employee_register"
+    employee_id = Column(
         Uuid,
         primary_key=True,
         nullable=False,
@@ -61,6 +32,29 @@ class UserRegistration(Base):
     )
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
+    )
+
+
+class Task(Base):
+    __tablename__ = "employee_tasks"
+    task_id = Column(
+        Uuid,
+        primary_key=True,
+        nullable=False,
+        server_default=text("uuid_generate_v4()"),
+    )
+    employee_id = Column(
+        Uuid,
+        ForeignKey("employee_detail.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    task_title = Column(String, nullable=False)
+    task_description = Column(String, nullable=True)
+    # task_status: str
+    # task_start_date: str
+    # task_end_date: str
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )

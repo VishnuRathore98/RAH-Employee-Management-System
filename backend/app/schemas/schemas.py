@@ -1,13 +1,31 @@
 from datetime import datetime
-from turtle import st
 from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr
+from enum import Enum
 
-from app.models.models import Gender
+
+class Role(str, Enum):
+    admin = "admin"
+    manager = "manager"
+    employee = "employee"
 
 
-class Users(BaseModel):
+class Gender(str, Enum):
+    male = "male"
+    female = "female"
+
+
+class User(BaseModel):
+    # user_id: Optional[UUID] = Field(default_factory=uuid4)
+    first_name: str
+    middle_name: Optional[str] = None
+    last_name: str
+    gender: Gender
+    roles: List[Role]
+
+
+class ResponseUsers(BaseModel):
     user_id: UUID
     first_name: str
     middle_name: Optional[str] = None
@@ -18,6 +36,13 @@ class Users(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class UserUpdateRequest(BaseModel):
+    first_name: Optional[str] = None
+    middle_name: Optional[str] = None
+    last_name: Optional[str] = None
+    roles: Optional[List[Role]] = []
 
 
 class DeleteUser(BaseModel):
@@ -33,7 +58,7 @@ class UserRegisterRequest(BaseModel):
 
 
 class UserRegisterResponse(BaseModel):
-    user_id: UUID
+    employee_id: UUID
     email: EmailStr
     created_at: datetime
 
@@ -51,3 +76,28 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     id: str
+
+
+# Task related schemas
+class Task(BaseModel):
+    # task_id: UUID
+    # employee_id: UUID
+    task_title: str
+    task_description: Optional[str] = None
+    # task_status: str
+    # task_start_date: str
+    # task_end_date: str
+    # created_at: datetime
+
+
+class ResponseTask(BaseModel):
+    task_id: UUID
+    task_title: str
+    task_description: Optional[str]
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+# Task related models

@@ -30,6 +30,8 @@ async def userLogin(
             status_code=status.HTTP_403_FORBIDDEN, detail="Invalid user credentials!"
         )
 
-    access_token = oauth.create_access_token(data={"user_id": str(user.user_id)})
+    access_token = oauth.create_access_token(
+        data={"employee_id": str(user.employee_id)}
+    )
     # Create and return JWT token
     return {"access_token": access_token, "token_type": "Bearer"}

@@ -6,21 +6,31 @@ from uuid import UUID
 from app.schemas import schemas
 from app.models import models
 from app.crud import database
-
+from app.utils import oauth
 
 router = APIRouter(prefix="/api/v1/employee", tags=["Employees"])
 
 
-# Get user info from database
-@router.get("/", response_model=List[schemas.Users])
-async def fetch_employees(db: Session = Depends(database.get_db)):
+# Get employee info from database
+@router.get("/", response_model=List[schemas.ResponseUsers])
+async def fetch_employees(
+    db: Session = Depends(database.get_db),
+    user_id: str = Depends(oauth.get_current_user),
+):
     employees = db.query(models.Employee).all()
     return employees
 
 
-# Get single user info from database
-@router.get("/{user_id}", response_model=schemas.Users)
-async def fetch_employee(user_id: UUID, db: Session = Depends(database.get_db)):
+# Get single employee info from database
+@router.get(
+    "/{user_id}",
+    response_model=schemas.ResponseUsers,
+)
+async def fetch_employee(
+    user_id: UUID,
+    db: Session = Depends(database.get_db),
+    id: str = Depends(oauth.get_current_user),
+):
 
     employee = (
         db.query(models.Employee).filter(models.Employee.user_id == user_id).first()
@@ -34,9 +44,14 @@ async def fetch_employee(user_id: UUID, db: Session = Depends(database.get_db)):
     return employee
 
 
-# Add a new user
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.Users)
-async def add_employee(user: models.User, db: Session = Depends(database.get_db)):
+# Add a new employee
+@router.post(
+    "/", status_code=status.HTTP_201_CREATED, response_model=schemas.ResponseUsers
+)
+async def add_employee(
+    user: schemas.User,
+    db: Session = Depends(database.get_db),
+):
     employee = models.Employee(**user.model_dump())
     db.add(employee)
     db.commit()
@@ -45,18 +60,19 @@ async def add_employee(user: models.User, db: Session = Depends(database.get_db)
     return employee
 
 
-# Update user data with user_id
+# Update employee data with employee_id
 @router.put(
-    "/{user_id}",
+    "/{employee_id}",
     status_code=status.HTTP_202_ACCEPTED,
-    response_model=schemas.Users,
+    response_model=schemas.ResponseUsers,
 )
 async def update_employee(
-    user_update: models.UserUpdateRequest,
-    user_id: UUID,
+    user_update: schemas.UserUpdateRequest,
+    employee_id: UUID,
     db: Session = Depends(database.get_db),
+    id: str = Depends(oauth.get_current_user),
 ):
-    employee = db.query(models.Employee).filter(models.Employee.user_id == user_id)
+    employee = db.query(models.Employee).filter(models.Employee.user_id == employee_id)
 
     if employee.first() == None:
         raise HTTPException(status_code=404, detail="User not found!")
@@ -67,18 +83,22 @@ async def update_employee(
     return employee.first()
 
 
-# Delete user with user_id
+# Delete employee with employee_id
 @router.delete(
-    "/{user_id}",
+    "/{employee_id}",
     status_code=status.HTTP_200_OK,
 )
-async def delete_employee(user_id: UUID, db: Session = Depends(database.get_db)):
+async def delete_employee(
+    employee_id: UUID,
+    db: Session = Depends(database.get_db),
+    id: str = Depends(oauth.get_current_user),
+):
 
-    employee = db.query(models.Employee).filter(models.Employee.user_id == user_id)
+    employee = db.query(models.Employee).filter(models.Employee.user_id == employee_id)
 
     if employee.first() == None:
-        raise HTTPException(status_code=404, detail="User does not exists.")
+        raise HTTPException(status_code=404, detail="Employee does not exists.")
     employee.delete(synchronize_session=False)
     db.commit()
 
-    return {"message": f"User with id:{user_id} deleted successfully"}
+    return {"message": f"Employee with id:{employee_id} deleted successfully"}
