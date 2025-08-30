@@ -47,7 +47,7 @@ class Task(Base):
     )
     employee_id = Column(
         Uuid,
-        ForeignKey("employee_detail.id", ondelete="CASCADE"),
+        ForeignKey("employee_register.employee_id", ondelete="CASCADE"),
         nullable=False,
     )
     task_title = Column(String, nullable=False)

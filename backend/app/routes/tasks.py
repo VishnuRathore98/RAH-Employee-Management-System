@@ -1,4 +1,5 @@
 from typing import List
+from uuid import UUID
 from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy.orm import Session
 from app.utils import utils, oauth
@@ -26,6 +27,24 @@ async def get_all_tasks(
 
 
 # Get specific employee's tasks
+@router.get(
+    "/{employee_id}",
+    response_model=schemas.ResponseTask,
+)
+async def fetch_employee(
+    employee_id: UUID,
+    db: Session = Depends(database.get_db),
+    current_employee: str = Depends(oauth.get_current_user),
+):
+
+    task = db.query(models.Task).filter(models.Task.employee_id == employee_id).first()
+
+    if task == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="No task found!"
+        )
+
+    return task
 
 
 # Create new task
@@ -35,11 +54,13 @@ async def get_all_tasks(
     status_code=status.HTTP_201_CREATED,
 )
 async def create_task(
+    employee_id: UUID,
     task: schemas.Task,
     db: Session = Depends(database.get_db),
     current_employee: str = Depends(oauth.get_current_user),
 ):
-    created_task = models.Task(current_employee.user_id, **task.model_dump())
+
+    created_task = models.Task(employee_id=employee_id, **task.model_dump())
     db.add(created_task)
     db.commit()
     db.refresh(created_task)
@@ -48,5 +69,32 @@ async def create_task(
 
 
 # Update existing task
+@router.put(
+    "/{task_id}",
+    status_code=status.HTTP_202_ACCEPTED,
+    response_model=schemas.ResponseTask,
+)
+async def update_task(
+    task_id: UUID,
+    task_update: schemas.TaskUpdateRequest,
+    db: Session = Depends(database.get_db),
+    current_employee: str = Depends(oauth.get_current_user),
+):
+    task = db.query(models.Task).filter(models.Task.task_id == task_id)
+
+    if task.first() == None:
+        raise HTTPException(status_code=404, detail="Task not found!")
+
+    if task.first().employee_id != UUID(current_employee.employee_id):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not authorized to perform this task.",
+        )
+
+    task.update(task_update.model_dump())
+    db.commit()
+
+    return task.first()
+
 
 # Delete existing task

@@ -4,6 +4,8 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr
 from enum import Enum
 
+from app.routes import employees
+
 
 class Role(str, Enum):
     admin = "admin"
@@ -75,7 +77,7 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    id: str
+    employee_id: str
 
 
 # Task related schemas
@@ -92,6 +94,7 @@ class Task(BaseModel):
 
 class ResponseTask(BaseModel):
     task_id: UUID
+    employee_id: UUID
     task_title: str
     task_description: Optional[str]
     created_at: datetime
@@ -100,4 +103,6 @@ class ResponseTask(BaseModel):
         orm_mode = True
 
 
-# Task related models
+class TaskUpdateRequest(BaseModel):
+    task_title: Optional[str] = None
+    task_description: Optional[str] = None
