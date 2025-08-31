@@ -1,6 +1,6 @@
 from app.crud.database import Base
 from sqlalchemy import ARRAY, TIMESTAMP, Column, ForeignKey, String, Uuid, text
-
+from sqlalchemy.orm import relationship
 from app.routes import employees
 
 
@@ -58,3 +58,4 @@ class Task(Base):
     created_at = Column(
         TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )
+    owner = relationship("UserRegistration")

@@ -50,17 +50,16 @@ async def fetch_employee(
 
 # Create new task
 @router.post(
-    "/create_task/{employee_id}",
-    response_model=schemas.ResponseTask,
+    "/create_task",
+    response_model=schemas.CreateTask,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_task(
-    employee_id: UUID,
     task: schemas.Task,
     db: Session = Depends(database.get_db),
     current_employee: str = Depends(oauth.get_current_user),
 ):
-
+    employee_id = current_employee.employee_id
     created_task = models.Task(employee_id=employee_id, **task.model_dump())
     db.add(created_task)
     db.commit()

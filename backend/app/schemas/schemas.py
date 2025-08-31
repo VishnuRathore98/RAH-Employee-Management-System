@@ -98,6 +98,18 @@ class ResponseTask(BaseModel):
     task_title: str
     task_description: Optional[str]
     created_at: datetime
+    owner: ResponseUsers
+
+    class Config:
+        orm_mode = True
+
+
+class CreateTask(BaseModel):
+    task_id: UUID
+    employee_id: UUID
+    task_title: str
+    task_description: Optional[str]
+    created_at: datetime
 
     class Config:
         orm_mode = True
