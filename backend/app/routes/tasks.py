@@ -1,6 +1,7 @@
 from typing import List
 from uuid import UUID
 from fastapi import APIRouter, status, HTTPException, Depends
+from sqlalchemy import delete
 from sqlalchemy.orm import Session
 from app.utils import utils, oauth
 from app.schemas import schemas
@@ -98,3 +99,35 @@ async def update_task(
 
 
 # Delete existing task
+@router.delete("/delete/{task_id}", status_code=status.HTTP_200_OK)
+async def delete_task(
+    task_id: UUID,
+    db: Session = Depends(database.get_db),
+    current_user: str = Depends(oauth.get_current_user),
+):
+
+    task = db.query(models.Task).filter(task_id == models.Task.task_id)
+
+    # print("task_id =====>", task_id)
+    # print("model.Task.task_id ==>", type(models.Task.task_id))
+    # print("task ========>", task.first().__dict__)
+
+    if task.first() is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Task not found!"
+        )
+
+    # print(current_user)
+
+    print(type(task.first().employee_id), "\t", type(current_user.employee_id))
+
+    if str(task.first().employee_id) != current_user.employee_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="You are not authorised to perform this operation!",
+        )
+    # print("success")
+    task.delete(synchronize_session=False)
+    db.commit()
+
+    return task
