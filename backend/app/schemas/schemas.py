@@ -28,7 +28,7 @@ class User(BaseModel):
 
 
 class ResponseUsers(BaseModel):
-    user_id: UUID
+    id: UUID
     first_name: str
     middle_name: Optional[str] = None
     last_name: str

@@ -1,9 +1,11 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from app.config.config import Settings
 
+settings = Settings()
 
-POSTGRES_DATABASE_URL = "postgresql://vpsr:12345678@localhost/mydb"
+POSTGRES_DATABASE_URL = f"postgresql://{settings.database_username}:{settings.database_password}@{settings.database_hostname}:{settings.database_port}/{settings.database_name}"
 
 engine = create_engine(POSTGRES_DATABASE_URL)
 
