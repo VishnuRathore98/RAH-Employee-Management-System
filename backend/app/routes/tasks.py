@@ -19,9 +19,10 @@ async def get_all_tasks(
     db: Session = Depends(database.get_db),
     # employee_id: str = Depends(oauth.get_current_user),
     limit: int = 1,
+    skip: int = 0,
 ):
 
-    tasks = db.query(models.Task).limit(limit=limit).all()
+    tasks = db.query(models.Task).limit(limit=limit).offset(skip).all()
 
     # print(tasks[0].__dict__)
     print(limit)
