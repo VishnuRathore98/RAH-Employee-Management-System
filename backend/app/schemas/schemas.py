@@ -118,3 +118,8 @@ class CreateTask(BaseModel):
 class TaskUpdateRequest(BaseModel):
     task_title: Optional[str] = None
     task_description: Optional[str] = None
+
+
+class Vote(BaseModel):
+    task_id: UUID
+    dir: bool

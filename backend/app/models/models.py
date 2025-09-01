@@ -56,3 +56,19 @@ class Task(Base):
         nullable=False,
     )
     owner = relationship("UserRegistration")
+
+
+class Vote(Base):
+    __tablename__ = "votes"
+    employee_id = Column(
+        Uuid,
+        ForeignKey("employee_register.employee_id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True,
+    )
+    task_id = Column(
+        Uuid,
+        ForeignKey("employee_tasks.task_id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True,
+    )

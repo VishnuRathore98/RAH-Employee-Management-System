@@ -4,8 +4,7 @@ import psycopg
 import psycopg.rows
 from app.models.models import Base
 from app.crud.database import engine
-from app.routes import employees, users, tasks
-from app.routes import authentication
+from app.routes import employees, users, tasks, authentication, votes
 
 # Required FastAPI setup
 
@@ -28,6 +27,7 @@ app.include_router(employees.router)
 app.include_router(users.router)
 app.include_router(authentication.router)
 app.include_router(tasks.router)
+app.include_router(votes.router)
 
 
 @app.get("/")
