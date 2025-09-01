@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy import delete
@@ -20,9 +20,16 @@ async def get_all_tasks(
     # employee_id: str = Depends(oauth.get_current_user),
     limit: int = 1,
     skip: int = 0,
+    search: Optional[str] = "",
 ):
 
-    tasks = db.query(models.Task).limit(limit=limit).offset(skip).all()
+    tasks = (
+        db.query(models.Task)
+        .filter(models.Task.task_title.contains(search))
+        .limit(limit=limit)
+        .offset(skip)
+        .all()
+    )
 
     # print(tasks[0].__dict__)
     print(limit)
