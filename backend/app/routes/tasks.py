@@ -18,11 +18,13 @@ router = APIRouter(prefix="/api/v1/employee/tasks", tags=["Tasks"])
 async def get_all_tasks(
     db: Session = Depends(database.get_db),
     # employee_id: str = Depends(oauth.get_current_user),
+    limit: int = 1,
 ):
 
-    tasks = db.query(models.Task).all()
+    tasks = db.query(models.Task).limit(limit=limit).all()
 
-    print(tasks[0].__dict__)
+    # print(tasks[0].__dict__)
+    print(limit)
 
     if not tasks:
         raise HTTPException(
