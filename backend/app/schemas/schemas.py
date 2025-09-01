@@ -98,7 +98,7 @@ class ResponseTask(BaseModel):
     task_title: str
     task_description: Optional[str]
     created_at: datetime
-    owner: ResponseUsers
+    owner: UserRegisterResponse
 
     class Config:
         orm_mode = True

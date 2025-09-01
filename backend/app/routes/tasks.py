@@ -2,7 +2,7 @@ from typing import List
 from uuid import UUID
 from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy import delete
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.utils import utils, oauth
 from app.schemas import schemas
 from app.crud import database
@@ -17,9 +17,13 @@ router = APIRouter(prefix="/api/v1/employee/tasks", tags=["Tasks"])
 )
 async def get_all_tasks(
     db: Session = Depends(database.get_db),
-    employee_id: str = Depends(oauth.get_current_user),
+    # employee_id: str = Depends(oauth.get_current_user),
 ):
+
     tasks = db.query(models.Task).all()
+
+    print(tasks[0].__dict__)
+
     if not tasks:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="No tasks found!"

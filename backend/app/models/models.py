@@ -45,17 +45,14 @@ class Task(Base):
         nullable=False,
         server_default=text("uuid_generate_v4()"),
     )
+    task_title = Column(String, nullable=False)
+    task_description = Column(String, nullable=True)
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
+    )
     employee_id = Column(
         Uuid,
         ForeignKey("employee_register.employee_id", ondelete="CASCADE"),
         nullable=False,
-    )
-    task_title = Column(String, nullable=False)
-    task_description = Column(String, nullable=True)
-    # task_status: str
-    # task_start_date: str
-    # task_end_date: str
-    created_at = Column(
-        TIMESTAMP(timezone=True), nullable=False, server_default=text("now()")
     )
     owner = relationship("UserRegistration")
