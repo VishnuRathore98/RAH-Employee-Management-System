@@ -32,9 +32,7 @@ async def fetch_employee(
     id: str = Depends(oauth.get_current_user),
 ):
 
-    employee = (
-        db.query(models.Employee).filter(models.Employee.user_id == user_id).first()
-    )
+    employee = db.query(models.Employee).filter(models.Employee.id == user_id).first()
 
     if employee == None:
         raise HTTPException(

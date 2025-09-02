@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import UUID
 from pydantic import BaseModel, EmailStr
 from enum import Enum
@@ -37,7 +37,7 @@ class ResponseUsers(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserUpdateRequest(BaseModel):
@@ -51,7 +51,7 @@ class DeleteUser(BaseModel):
     user_id: UUID
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserRegisterRequest(BaseModel):
@@ -65,7 +65,7 @@ class UserRegisterResponse(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class Token(BaseModel):
@@ -73,7 +73,7 @@ class Token(BaseModel):
     token_type: str
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class TokenData(BaseModel):
@@ -101,7 +101,12 @@ class ResponseTask(BaseModel):
     owner: UserRegisterResponse
 
     class Config:
-        orm_mode = True
+        from_attributes = True
+
+
+class TaskOut(BaseModel):
+    Task: ResponseTask
+    votes: int
 
 
 class CreateTask(BaseModel):
@@ -112,7 +117,7 @@ class CreateTask(BaseModel):
     created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class TaskUpdateRequest(BaseModel):

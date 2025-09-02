@@ -1,9 +1,9 @@
 from typing import List, Optional
 from uuid import UUID
 from fastapi import APIRouter, status, HTTPException, Depends
-from sqlalchemy import delete
-from sqlalchemy.orm import Session, joinedload
-from app.utils import utils, oauth
+from sqlalchemy import func
+from sqlalchemy.orm import Session
+from app.utils import oauth
 from app.schemas import schemas
 from app.crud import database
 from app.models import models
@@ -12,9 +12,7 @@ router = APIRouter(prefix="/api/v1/employee/tasks", tags=["Tasks"])
 
 
 # Get all tasks
-@router.get(
-    "/", response_model=List[schemas.ResponseTask], status_code=status.HTTP_200_OK
-)
+@router.get("/", response_model=List[schemas.TaskOut], status_code=status.HTTP_200_OK)
 async def get_all_tasks(
     db: Session = Depends(database.get_db),
     # employee_id: str = Depends(oauth.get_current_user),
@@ -24,40 +22,52 @@ async def get_all_tasks(
 ):
 
     tasks = (
-        db.query(models.Task)
+        db.query(models.Task, func.count(models.Vote.task_id).label("votes"))
+        .join(models.Vote, models.Vote.task_id == models.Task.task_id, isouter=True)
+        .group_by(models.Task.task_id)
         .filter(models.Task.task_title.contains(search))
-        .limit(limit=limit)
+        .limit(limit)
         .offset(skip)
         .all()
     )
 
-    # print(tasks[0].__dict__)
-    print(limit)
+    # print(type(tasks[0]))
 
     if not tasks:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="No tasks found!"
         )
+
     return tasks
 
 
 # Get specific employee's tasks
 @router.get(
-    "/{employee_id}",
-    response_model=schemas.ResponseTask,
+    "/{task_id}",
+    response_model=schemas.TaskOut,
 )
 async def fetch_employee(
-    employee_id: UUID,
+    task_id: UUID,
     db: Session = Depends(database.get_db),
     current_employee: str = Depends(oauth.get_current_user),
 ):
 
-    task = db.query(models.Task).filter(models.Task.employee_id == employee_id).first()
+    query_task = db.query(models.Task).filter(models.Task.task_id == task_id)
 
-    if task == None:
+    if query_task.first() == None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="No task found!"
         )
+
+    task = (
+        db.query(models.Task, func.count(models.Vote.task_id).label("votes"))
+        .join(models.Vote, models.Vote.task_id == models.Task.task_id, isouter=True)
+        .group_by(models.Task.task_id)
+        # .filter(models.Task.task_title.contains(search))
+        # .limit(limit)
+        # .offset(skip)
+        .first()
+    )
 
     return task
 
