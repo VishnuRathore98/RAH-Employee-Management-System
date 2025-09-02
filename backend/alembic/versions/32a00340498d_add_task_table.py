@@ -21,7 +21,26 @@ depends_on: Union[str, Sequence[str], None] = None
 
 def upgrade() -> None:
     """Upgrade schema."""
+    op.create_table(
+        "tasks",
+        sa.Column(
+            "task_id",
+            sa.Uuid,
+            primary_key=True,
+            nullable=False,
+            server_default=sa.text("uuid_generate_v4()"),
+        ),
+        sa.Column("task_title", sa.String, nullable=False),
+        sa.Column("task_description", sa.String, nullable=True),
+        sa.Column(
+            "created_at",
+            sa.TIMESTAMP(timezone=True),
+            nullable=False,
+            server_default=sa.text("now()"),
+        ),
+    )
 
 
 def downgrade() -> None:
     """Downgrade schema."""
+    op.drop_table("tasks")
