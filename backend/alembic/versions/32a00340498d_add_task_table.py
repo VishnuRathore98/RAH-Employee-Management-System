@@ -43,4 +43,4 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     """Downgrade schema."""
-    op.drop_table("tasks")
+    op.execute("DROP TABLE tasks CASCADE")
