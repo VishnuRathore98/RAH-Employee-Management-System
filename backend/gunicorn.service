@@ -1,0 +1,15 @@
+# Creating systemd service for starting the server automatically
+
+[Unit]
+Description = RAH-EMS application
+After=network.target
+
+[Service]
+User=RAH
+Group=RAH
+WorkingDirectory=/home/RAH/RAH-EMS/backend/app/
+Environment=<path to Environment>
+ExecStart=<command to spin up the server>
+
+[Install]
+WantedBy=multi-user.target

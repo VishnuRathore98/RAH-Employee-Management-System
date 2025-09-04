@@ -17,6 +17,7 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-jose = {extras = ["cryptography"], version = "^3.5.0"}
 pydantic-settings = "^2.10.1"
 alembic = "^1.16.5"
+gunicorn = "^23.0.0"
 
 
 [build-system]
