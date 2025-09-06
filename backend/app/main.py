@@ -1,3 +1,4 @@
+import time
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import psycopg
@@ -7,7 +8,7 @@ from app.crud.database import engine
 from app.routes import employees, users, tasks, authentication, votes
 
 # Required FastAPI setup
-
+time.sleep(120)
 app = FastAPI()
 
 origins = ["*"]

@@ -1,0 +1,14 @@
+services: 
+  api:  # first service 
+    depends_on:
+      - postgres
+    build: .  # running docker build command on the cwd and dockerfile present there
+    ports: 
+      - 8000:8000   # <port on localhost>:<port on container>
+    env_file:
+      - ./.env # path to env variables
+  postgres:
+    image: postgres
+    environment: 
+      - POSTGRES_PASSWORD=12345678
+      - POSTGRES_DB=mydb

@@ -1,13 +1,44 @@
-FROM python:3.9.23-trixie
+# Stage 1: Build environment
+FROM python:3.12-slim-bookworm AS builder
 
-WORKDIR /usr/src/app
+# Set environment variables for a non-interactive and isolated Poetry install
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VERSION=1.8.2 \
+    POETRY_HOME="/opt/poetry" \
+    PATH="/opt/poetry/bin:$PATH" \
+    PYTHONUNBUFFERED=1
 
-COPY pyproject.toml ./
+# Install Poetry, build tools, and PostgreSQL development libraries
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        gcc \
+        libpq-dev \
+        python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+# Install Poetry
+RUN pip install "poetry==$POETRY_VERSION"
 
-CMD ['poetry', 'install' ]
+WORKDIR /app
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --only main --no-root
 
-COPY . .
+# Stage 2: Production environment
+FROM python:3.12-slim-bookworm AS production
 
-CMD ['poetry','run', 'uvicorn', 'app.main:app', '--host','0.0.0.0','port','8000']
+# Set environment variables for the virtual environment
+ENV VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
+
+# Copy the virtual environment and application code from the builder stage
+COPY --from=builder /app/.venv /app/.venv
+COPY . /app
+
+# Ensure the application runs as a non-root user
+RUN adduser --system --no-create-home appuser
+USER appuser
+WORKDIR /app
+
+# Command to run your application
+CMD ["gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
