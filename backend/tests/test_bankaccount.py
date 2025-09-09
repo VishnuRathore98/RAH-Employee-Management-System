@@ -1,4 +1,4 @@
-from app.bankaccount import BankAccount
+from app.bankaccount import BankAccount, Insufficiant_balance
 import pytest
 
 @pytest.fixture
@@ -33,3 +33,7 @@ def test_bank_transaction(zero_bank_account,deposited,withdrew,expected):
     zero_bank_account.deposite(deposited)
     zero_bank_account.withdraw(withdrew)
     assert zero_bank_account.balance == expected
+
+def test_insufficiant_balance(bank_account):
+    with pytest.raises(Insufficiant_balance):
+        bank_account.withdraw(150)
