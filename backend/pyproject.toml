@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Backend for ems"
 authors = ["VishnuRathore98 <rathorevishnu666@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.12"
@@ -19,6 +20,7 @@ pydantic-settings = "^2.10.1"
 alembic = "^1.16.5"
 gunicorn = "^23.0.0"
 pytest = "^8.4.2"
+httpx = "^0.28.1"
 
 
 [build-system]
