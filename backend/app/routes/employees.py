@@ -75,7 +75,7 @@ async def update_employee(
     if employee.first() == None:
         raise HTTPException(status_code=404, detail="User not found!")
 
-    employee.update(user_update.model_dump())
+    employee.update(**user_update.model_dump())
     db.commit()
 
     return employee.first()
