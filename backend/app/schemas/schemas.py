@@ -4,7 +4,6 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr
 from enum import Enum
 
-from app.routes import employees
 
 
 class Role(str, Enum):
