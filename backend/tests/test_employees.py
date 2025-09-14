@@ -2,7 +2,6 @@ from jose import jwt
 import pytest
 from app.config.config import settings
 from app.schemas import schemas
-from tests.dummy_database import client
 
 # class UserRegisterRequest(BaseModel):
 #     email: EmailStr
@@ -17,21 +16,6 @@ from tests.dummy_database import client
 #     class Config:
 #         from_attributes = True
 #
-
-@pytest.fixture
-def test_user(client):
-    user_data = {
-        "email":"john@mail.com",
-        "password":"12345678"
-    }
-    res = client.post("/api/v1/user/", json=user_data)
-    new_user = res.json()
-    assert res.status_code == 201
-    assert new_user['email'] == 'john@mail.com'
-    new_user['password'] = '12345678'
-    # print(new_user)
-    return new_user
-
 def test_root(client):
     res = client.get("/")
     # print(res.json())
