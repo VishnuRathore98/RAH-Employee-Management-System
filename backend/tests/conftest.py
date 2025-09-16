@@ -11,6 +11,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from app.config.config import Settings
 from app.models.models import Base
 from app.crud.database import get_db
+from app.utils.oauth import create_access_token
 
 settings = Settings()
 
@@ -55,3 +56,15 @@ def test_user(client):
     return new_user
 
 
+@pytest.fixture
+def token(test_user):
+    return create_access_token({'employee_id':test_user['employee_id']})
+
+
+@pytest.fixture
+def authorized_client(client, token):
+    client.headers = {
+        **client.headers,
+        'Authorization':f'Bearer {token}'
+    }
+    return client
